@@ -4,7 +4,6 @@ import {
   Typography,
   TextField,
   IconButton,
-  Box,
   Stack,
   InputAdornment,
 } from '@mui/material';
@@ -21,33 +20,33 @@ interface LensCardProps {
 }
 
 export function LensCard({ lens, index, canDelete, onUpdate, onDelete }: LensCardProps) {
-  const handleChange = (field: keyof Omit<Lens, 'id'>) => (
+  const handleChange = (field: 'aperture' | 'focalLength' | 'position') => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value)) {
-      onUpdate(lens.id, { [field]: value });
+      onUpdate(lens.id, { [field]: value } as Partial<Omit<Lens, 'id'>>);
     }
   };
 
   return (
     <Card sx={{ position: 'relative' }}>
       <CardContent>
-        <Box display="flex" alignItems="center" mb={2}>
-          <CenterFocusStrongIcon sx={{ color: 'primary.main', mr: 1 }} />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <CenterFocusStrongIcon style={{ color: '#90caf9', marginRight: 8 }} />
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
             Линза {index + 1}
           </Typography>
           {canDelete && (
             <IconButton
               size="small"
               onClick={() => onDelete(lens.id)}
-              sx={{ color: 'error.main' }}
+              style={{ color: '#f44336' }}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
           )}
-        </Box>
+        </div>
         <Stack spacing={2}>
           <TextField
             label="Апертура (диаметр)"
