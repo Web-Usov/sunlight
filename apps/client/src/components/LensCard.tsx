@@ -33,7 +33,7 @@ export function LensCard({ lens, index, canDelete, onUpdate, onDelete }: LensCar
   return (
     <Card sx={{ position: 'relative' }}>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Box display="flex" alignItems="center" mb={2}>
           <CenterFocusStrongIcon sx={{ color: 'primary.main', mr: 1 }} />
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Линза {index + 1}

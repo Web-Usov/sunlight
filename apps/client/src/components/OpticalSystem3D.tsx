@@ -216,15 +216,14 @@ function LightRays({ lenses, pv, zenithAngle, rayCount }: LightRaysProps) {
         
         let currentY = hitY;
         let currentZ = hitZ;
-        let accumulatedFocalShiftY = 0;
         
         for (let lIdx = 0; lIdx < sortedLenses.length; lIdx++) {
           const lens = sortedLenses[lIdx];
           const lensPos = lens.position * SCALE;
           const focalLength = lens.focalLength * SCALE;
           
-          const focalShiftY = focalLength * Math.tan(angleRad);
-          accumulatedFocalShiftY = focalShiftY;
+          const _focalShiftY = focalLength * Math.tan(angleRad);
+          void _focalShiftY;
           
           if (lIdx > 0) {
             const prevLens = sortedLenses[lIdx - 1];
