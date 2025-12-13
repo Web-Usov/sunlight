@@ -21,6 +21,8 @@ RUN pnpm install --frozen-lockfile
 
 COPY apps/client ./apps/client/
 
+RUN pnpm build --filter=@sunlight/optics-core
+
 WORKDIR /workspace/apps/client
 RUN pnpm build --mode prod
 
