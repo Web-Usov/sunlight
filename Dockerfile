@@ -19,8 +19,6 @@ COPY apps/client/package.json ./apps/client/
 
 RUN pnpm install --frozen-lockfile
 
-COPY .env.prod ./.env
-
 COPY apps/client ./apps/client/
 
 WORKDIR /workspace/apps/client
