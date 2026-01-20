@@ -17,7 +17,7 @@ import {
 import View3dIcon from '@mui/icons-material/ViewInAr';
 import SettingsIcon from '@mui/icons-material/Settings';
 import type { Lens, PhotovoltaicCell } from '@sunlight/optics-core';
-import { degToRad } from '@sunlight/optics-core';
+import { degToRad, traceRaysThroughSystem } from '@sunlight/optics-core';
 
 const VISUAL_SETTINGS_KEY = 'sunlight-visual-settings';
 
@@ -185,13 +185,46 @@ function LightRays({ lenses, pv, zenithAngle, rayCount }: LightRaysProps) {
   );
 
   const rays = useMemo(() => {
-    if (sortedLenses.length === 0) return [];
+    const angleRad = degToRad(zenithAngle);
+    const rayLines: Array<{ points: THREE.Vector3[]; color: string }> = [];
+    
+    if (sortedLenses.length === 0) {
+      const pvWidth = pv.shape === 'circular' ? pv.diameter : Math.max(pv.width, pv.height);
+      const aperture = pvWidth * SCALE;
+      const gridSize = Math.ceil(Math.sqrt(rayCount));
+      const spacing = aperture / (gridSize + 1);
+      const rayLength = 1.0 * SCALE;
+      
+      const pvX = pv.position * SCALE;
+      
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          const hitY = -aperture / 2 + spacing * (i + 1);
+          const hitZ = -aperture / 2 + spacing * (j + 1);
+          
+          const startX = pvX - rayLength;
+          const startY = hitY - Math.tan(angleRad) * rayLength;
+          const startZ = hitZ;
+          
+          const points: THREE.Vector3[] = [];
+          points.push(new THREE.Vector3(startX, startY, startZ));
+          points.push(new THREE.Vector3(pvX, hitY, hitZ));
+          
+          const intensity = Math.cos(angleRad);
+          const hue = 0.12 - intensity * 0.05;
+          
+          rayLines.push({
+            points,
+            color: `hsl(${hue * 360}, 100%, ${50 + intensity * 30}%)`,
+          });
+        }
+      }
+      
+      return rayLines;
+    }
 
     const firstLens = sortedLenses[0];
     const aperture = firstLens.aperture * SCALE;
-    const angleRad = degToRad(zenithAngle);
-    
-    const rayLines: Array<{ points: THREE.Vector3[]; color: string }> = [];
     
     const gridSize = Math.ceil(Math.sqrt(rayCount));
     const spacing = aperture / (gridSize + 1);
@@ -332,17 +365,27 @@ interface LightSpotProps {
   pv: PhotovoltaicCell;
   zenithAngle: number;
   settings: VisualSettings;
+  effectiveArea?: number;
 }
 
-function LightSpot({ lenses, pv, zenithAngle, settings }: LightSpotProps) {
+function LightSpot({ lenses, pv, zenithAngle, settings, effectiveArea }: LightSpotProps) {
   const spotData = useMemo(() => {
-    if (lenses.length === 0) return null;
+    const angleRad = degToRad(zenithAngle);
+    
+    if (lenses.length === 0) {
+      const pvWidth = pv.shape === 'circular' ? pv.diameter : Math.max(pv.width, pv.height);
+      
+      return {
+        spotDiameter: pvWidth,
+        spotCenterY: 0,
+        pvPosition: pv.position,
+      };
+    }
     
     const sortedLenses = [...lenses].sort((a, b) => a.position - b.position);
     const lastLens = sortedLenses[sortedLenses.length - 1];
     const firstLens = sortedLenses[0];
     
-    const angleRad = degToRad(zenithAngle);
     const effectiveAperture = firstLens.aperture * Math.cos(angleRad);
     
     const distToPV = pv.position - lastLens.position;
@@ -366,12 +409,13 @@ function LightSpot({ lenses, pv, zenithAngle, settings }: LightSpotProps) {
     };
   }, [lenses, pv, zenithAngle]);
 
-  if (!spotData) return null;
-
   const { spotDiameter, spotCenterY, pvPosition } = spotData;
   const spotRadius = (spotDiameter / 2) * SCALE;
   const posX = pvPosition * SCALE;
   const posY = spotCenterY * SCALE;
+
+  const displayArea = effectiveArea !== undefined ? effectiveArea : Math.PI * Math.pow(spotDiameter / 2, 2);
+  const areaInCm2 = displayArea * 10000;
 
   return (
     <group position={[posX - 0.001, posY, 0]}>
@@ -393,7 +437,10 @@ function LightSpot({ lenses, pv, zenithAngle, settings }: LightSpotProps) {
           anchorX="center"
           anchorY="bottom"
         >
-          {`Ø${(spotDiameter * 1000).toFixed(1)}мм`}
+          {areaInCm2 < 10 
+            ? `${(areaInCm2 * 100).toFixed(1)}мм²`
+            : `${areaInCm2.toFixed(1)}см²`
+          }
         </Text>
       )}
     </group>
@@ -402,9 +449,10 @@ function LightSpot({ lenses, pv, zenithAngle, settings }: LightSpotProps) {
 
 interface SceneProps extends OpticalSystem3DProps {
   settings: VisualSettings;
+  effectiveArea?: number;
 }
 
-function Scene({ lenses, pv, zenithAngle, settings }: SceneProps) {
+function Scene({ lenses, pv, zenithAngle, settings, effectiveArea }: SceneProps) {
   const sortedLenses = useMemo(
     () => [...lenses].sort((a, b) => a.position - b.position),
     [lenses]
@@ -434,7 +482,13 @@ function Scene({ lenses, pv, zenithAngle, settings }: SceneProps) {
       <PVComponent pv={pv} settings={settings} />
       
       {settings.showLightSpot && (
-        <LightSpot lenses={lenses} pv={pv} zenithAngle={zenithAngle} settings={settings} />
+        <LightSpot 
+          lenses={lenses} 
+          pv={pv} 
+          zenithAngle={zenithAngle} 
+          settings={settings}
+          effectiveArea={effectiveArea}
+        />
       )}
       
       <LightRays lenses={lenses} pv={pv} zenithAngle={zenithAngle} rayCount={settings.rayCount} />
@@ -461,6 +515,12 @@ export function OpticalSystem3D({ lenses, pv, zenithAngle, fullscreen = false }:
   const updateSetting = <K extends keyof VisualSettings>(key: K, value: VisualSettings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
+
+  const effectiveArea = useMemo(() => {
+    const system = { lenses, pv };
+    const result = traceRaysThroughSystem(system, zenithAngle);
+    return result.effectiveArea;
+  }, [lenses, pv, zenithAngle]);
 
   const settingsPanel = (
     <Collapse in={showSettings}>
@@ -564,7 +624,7 @@ export function OpticalSystem3D({ lenses, pv, zenithAngle, fullscreen = false }:
       }}
     >
       <color attach="background" args={['#1e2430']} />
-      <Scene lenses={lenses} pv={pv} zenithAngle={zenithAngle} settings={settings} />
+      <Scene lenses={lenses} pv={pv} zenithAngle={zenithAngle} settings={settings} effectiveArea={effectiveArea} />
     </Canvas>
   );
 

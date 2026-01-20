@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -8,15 +8,14 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
+} from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import WbSunnyIcon from "@mui/icons-material/WbSunny";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import SettingsIcon from "@mui/icons-material/Settings";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
 import {
   LensCard,
   PVCard,
@@ -24,10 +23,10 @@ import {
   ResultsPanel,
   PowerChart,
   OpticalSystem3D,
-} from './components';
-import { useOpticalSystem } from './hooks/useOpticalSystem';
+} from "./components";
+import { useOpticalSystem } from "./hooks/useOpticalSystem";
 
-const SIDEBAR_WIDTHS_KEY = 'sunlight-sidebar-widths';
+const SIDEBAR_WIDTHS_KEY = "sunlight-sidebar-widths";
 const DEFAULT_LEFT_WIDTH = 340;
 const DEFAULT_RIGHT_WIDTH = 380;
 const MIN_SIDEBAR_WIDTH = 280;
@@ -45,7 +44,7 @@ function loadSidebarWidths(): SidebarWidths {
       return JSON.parse(stored);
     }
   } catch (e) {
-    console.warn('Failed to load sidebar widths:', e);
+    console.warn("Failed to load sidebar widths:", e);
   }
   return { left: DEFAULT_LEFT_WIDTH, right: DEFAULT_RIGHT_WIDTH };
 }
@@ -54,12 +53,12 @@ function saveSidebarWidths(widths: SidebarWidths): void {
   try {
     localStorage.setItem(SIDEBAR_WIDTHS_KEY, JSON.stringify(widths));
   } catch (e) {
-    console.warn('Failed to save sidebar widths:', e);
+    console.warn("Failed to save sidebar widths:", e);
   }
 }
 
 interface ResizeHandleProps {
-  side: 'left' | 'right';
+  side: "left" | "right";
   onResize: (delta: number) => void;
 }
 
@@ -79,19 +78,19 @@ function ResizeHandle({ side, onResize }: ResizeHandleProps) {
     const handleMouseMove = (e: MouseEvent) => {
       const delta = e.clientX - startXRef.current;
       startXRef.current = e.clientX;
-      onResize(side === 'left' ? delta : -delta);
+      onResize(side === "left" ? delta : -delta);
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging, onResize, side]);
 
@@ -99,28 +98,28 @@ function ResizeHandle({ side, onResize }: ResizeHandleProps) {
     <Box
       onMouseDown={handleMouseDown}
       sx={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         bottom: 0,
         width: 6,
-        cursor: 'col-resize',
+        cursor: "col-resize",
         zIndex: 100,
-        ...(side === 'left' ? { right: -3 } : { left: -3 }),
-        '&:hover, &:active': {
-          '&::after': {
+        ...(side === "left" ? { right: -3 } : { left: -3 }),
+        "&:hover, &:active": {
+          "&::after": {
             opacity: 1,
           },
         },
-        '&::after': {
+        "&::after": {
           content: '""',
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           bottom: 0,
           left: 2,
           width: 2,
-          bgcolor: 'primary.main',
+          bgcolor: "primary.main",
           opacity: isDragging ? 1 : 0,
-          transition: 'opacity 0.15s',
+          transition: "opacity 0.15s",
         },
       }}
     />
@@ -129,27 +128,35 @@ function ResizeHandle({ side, onResize }: ResizeHandleProps) {
 
 function App() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [leftOpen, setLeftOpen] = useState(!isMobile);
   const [rightOpen, setRightOpen] = useState(!isMobile);
-  const [sidebarWidths, setSidebarWidths] = useState<SidebarWidths>(() => loadSidebarWidths());
+  const [sidebarWidths, setSidebarWidths] = useState<SidebarWidths>(() =>
+    loadSidebarWidths()
+  );
 
   useEffect(() => {
     saveSidebarWidths(sidebarWidths);
   }, [sidebarWidths]);
 
   const handleLeftResize = useCallback((delta: number) => {
-    setSidebarWidths(prev => ({
+    setSidebarWidths((prev) => ({
       ...prev,
-      left: Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, prev.left + delta)),
+      left: Math.min(
+        MAX_SIDEBAR_WIDTH,
+        Math.max(MIN_SIDEBAR_WIDTH, prev.left + delta)
+      ),
     }));
   }, []);
 
   const handleRightResize = useCallback((delta: number) => {
-    setSidebarWidths(prev => ({
+    setSidebarWidths((prev) => ({
       ...prev,
-      right: Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, prev.right + delta)),
+      right: Math.min(
+        MAX_SIDEBAR_WIDTH,
+        Math.max(MIN_SIDEBAR_WIDTH, prev.right + delta)
+      ),
     }));
   }, []);
 
@@ -162,8 +169,6 @@ function App() {
     angleSweepData,
     validationErrors,
     isValid,
-    addLens,
-    removeLens,
     updateLens,
     updatePV,
     setIntensity,
@@ -172,30 +177,36 @@ function App() {
   } = useOpticalSystem();
 
   const leftDrawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <SettingsIcon sx={{ color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>Параметры</Typography>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+    >
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <SettingsIcon sx={{ color: "primary.main" }} />
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          Параметры
+        </Typography>
         <IconButton onClick={() => setLeftOpen(false)} size="small">
           <ChevronLeftIcon />
         </IconButton>
       </Box>
       <Divider />
-      <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+      <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
         <Stack spacing={2}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <Typography variant="subtitle2" color="text.secondary">
               Оптическая система
             </Typography>
-            <Button
-              startIcon={<AddIcon />}
-              onClick={addLens}
-              disabled={lenses.length >= 3}
-              size="small"
-              variant="outlined"
-            >
-              Линза
-            </Button>
           </Box>
 
           {lenses.map((lens, index) => (
@@ -203,9 +214,7 @@ function App() {
               key={lens.id}
               lens={lens}
               index={index}
-              canDelete={lenses.length > 1}
               onUpdate={updateLens}
-              onDelete={removeLens}
             />
           ))}
 
@@ -239,25 +248,26 @@ function App() {
   );
 
   const rightDrawerContent = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+    >
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <IconButton onClick={() => setRightOpen(false)} size="small">
           <ChevronRightIcon />
         </IconButton>
-        <AnalyticsIcon sx={{ color: 'secondary.main' }} />
+        <AnalyticsIcon sx={{ color: "secondary.main" }} />
         <Typography variant="h6">Результаты</Typography>
       </Box>
       <Divider />
-      <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+      <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
         <Stack spacing={2}>
-          <ResultsPanel
-            result={result}
-            validationErrors={validationErrors}
-          />
-          <PowerChart 
-            data={angleSweepData} 
-            currentAngle={zenithAngle}
-          />
+          <ResultsPanel result={result} validationErrors={validationErrors} />
+          <PowerChart data={angleSweepData} currentAngle={zenithAngle} />
         </Stack>
       </Box>
       {!isMobile && <ResizeHandle side="right" onResize={handleRightResize} />}
@@ -265,19 +275,19 @@ function App() {
   );
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Left Sidebar */}
       {leftOpen && (
         <Box
           sx={{
-            width: isMobile ? '100%' : sidebarWidths.left,
+            width: isMobile ? "100%" : sidebarWidths.left,
             flexShrink: 0,
-            height: '100%',
-            position: isMobile ? 'fixed' : 'relative',
+            height: "100%",
+            position: isMobile ? "fixed" : "relative",
             zIndex: isMobile ? 1200 : 1,
-            bgcolor: 'background.paper',
-            borderRight: '1px solid',
-            borderColor: 'divider',
+            bgcolor: "background.paper",
+            borderRight: "1px solid",
+            borderColor: "divider",
           }}
         >
           {leftDrawerContent}
@@ -289,24 +299,24 @@ function App() {
         component="main"
         sx={{
           flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          overflow: 'hidden',
-          bgcolor: 'background.default',
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          overflow: "hidden",
+          bgcolor: "background.default",
           minWidth: 0,
         }}
       >
         {/* Header */}
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             p: 1.5,
             gap: 1,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.paper',
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
           }}
         >
           {!leftOpen && (
@@ -314,15 +324,15 @@ function App() {
               <MenuIcon />
             </IconButton>
           )}
-          <WbSunnyIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+          <WbSunnyIcon sx={{ color: "primary.main", fontSize: 28 }} />
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
-              background: 'linear-gradient(90deg, #FFB300 0%, #FFD54F 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              background: "linear-gradient(90deg, #FFB300 0%, #FFD54F 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
               flexGrow: 1,
             }}
           >
@@ -336,7 +346,7 @@ function App() {
         </Box>
 
         {/* 3D Viewport */}
-        <Box sx={{ flex: 1, position: 'relative', minHeight: 0 }}>
+        <Box sx={{ flex: 1, position: "relative", minHeight: 0 }}>
           {isValid ? (
             <OpticalSystem3D
               lenses={lenses}
@@ -347,14 +357,16 @@ function App() {
           ) : (
             <Box
               sx={{
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'text.secondary',
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "text.secondary",
               }}
             >
-              <Typography>Настройте параметры системы для отображения</Typography>
+              <Typography>
+                Настройте параметры системы для отображения
+              </Typography>
             </Box>
           )}
         </Box>
@@ -364,15 +376,15 @@ function App() {
       {rightOpen && (
         <Box
           sx={{
-            width: isMobile ? '100%' : sidebarWidths.right,
+            width: isMobile ? "100%" : sidebarWidths.right,
             flexShrink: 0,
-            height: '100%',
-            position: isMobile ? 'fixed' : 'relative',
+            height: "100%",
+            position: isMobile ? "fixed" : "relative",
             right: 0,
             zIndex: isMobile ? 1200 : 1,
-            bgcolor: 'background.paper',
-            borderLeft: '1px solid',
-            borderColor: 'divider',
+            bgcolor: "background.paper",
+            borderLeft: "1px solid",
+            borderColor: "divider",
           }}
         >
           {rightDrawerContent}
@@ -387,12 +399,12 @@ function App() {
             setRightOpen(false);
           }}
           sx={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            bgcolor: "rgba(0, 0, 0, 0.5)",
             zIndex: 1100,
           }}
         />

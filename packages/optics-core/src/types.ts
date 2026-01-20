@@ -3,6 +3,7 @@ export interface Lens {
   aperture: number;
   focalLength: number;
   position: number;
+  transmittance: number;
 }
 
 export type PVShape = 'rectangular' | 'circular';
@@ -26,6 +27,19 @@ export interface OpticalSystem {
   pv: PhotovoltaicCell;
 }
 
+export interface SurfaceInteraction {
+  incidentAngle: number;
+  refractedAngle: number;
+  transmittance: number;
+  reflectance: number;
+}
+
+export interface RayPath {
+  surfaces: SurfaceInteraction[];
+  outputAngle: number;
+  totalTransmittance: number;
+}
+
 export interface RayTraceResult {
   spotDiameter: number;
   spotArea: number;
@@ -34,6 +48,9 @@ export interface RayTraceResult {
   effectiveArea: number;
   concentrationRatio: number;
   isValid: boolean;
+  outputAngle: number;
+  totalTransmittance: number;
+  rayPath?: RayPath;
 }
 
 export interface PowerCalculationResult {
@@ -51,5 +68,7 @@ export interface AngleSweepResult {
   power: number;
   efficiency: number;
 }
+
+export type ABCDMatrix = [[number, number], [number, number]];
 
 

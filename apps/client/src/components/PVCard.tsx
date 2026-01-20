@@ -21,12 +21,12 @@ interface PVCardProps {
 }
 
 export function PVCard({ pv, onUpdate }: PVCardProps) {
-  const handleChange = (field: keyof PhotovoltaicCell) => (
+  const handleChange = (field: 'width' | 'height' | 'diameter' | 'position' | 'efficiency') => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value)) {
-      onUpdate({ [field]: value });
+      onUpdate({ [field]: value } as Partial<PhotovoltaicCell>);
     }
   };
 
@@ -46,8 +46,8 @@ export function PVCard({ pv, onUpdate }: PVCardProps) {
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <SolarPowerIcon sx={{ color: 'secondary.main', mr: 1 }} />
+        <Box display="flex" alignItems="center" mb={2}>
+          <SolarPowerIcon style={{ color: '#ce93d8', marginRight: 8 }} />
           <Typography variant="h6">
             Фотоэлектропреобразователь (ФЭП)
           </Typography>
@@ -65,11 +65,11 @@ export function PVCard({ pv, onUpdate }: PVCardProps) {
               size="small"
             >
               <ToggleButton value="rectangular">
-                <CropSquareIcon sx={{ mr: 1 }} />
+                <CropSquareIcon style={{ marginRight: 8 }} />
                 Прямоугольная
               </ToggleButton>
               <ToggleButton value="circular">
-                <CircleOutlinedIcon sx={{ mr: 1 }} />
+                <CircleOutlinedIcon style={{ marginRight: 8 }} />
                 Круглая
               </ToggleButton>
             </ToggleButtonGroup>
