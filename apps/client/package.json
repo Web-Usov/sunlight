@@ -1,6 +1,7 @@
 {
   "name": "@sunlight/client",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "dockerRepository": "ghcr.io/web-usov/sunlight",
   "private": true,
   "type": "module",
   "scripts": {

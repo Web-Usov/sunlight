@@ -174,7 +174,51 @@ function App() {
     setIntensity,
     setZenithAngle,
     reset,
+    exportCsv,
+    importFromCsv,
   } = useOpticalSystem();
+
+  const importInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleExportCsv = useCallback(() => {
+    const csv = exportCsv();
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sunlight-inputs-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, [exportCsv]);
+
+  const handleImportClick = useCallback(() => {
+    importInputRef.current?.click();
+  }, []);
+
+  const handleImportFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          importFromCsv(String(reader.result ?? ""));
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Не удалось импортировать CSV";
+          window.alert(message);
+        }
+      };
+      reader.onerror = () => {
+        window.alert("Не удалось прочитать файл CSV");
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    },
+    [importFromCsv]
+  );
 
   const leftDrawerContent = (
     <Box
@@ -232,16 +276,43 @@ function App() {
       </Box>
       <Divider />
       <Box sx={{ p: 2 }}>
-        <Button
-          fullWidth
-          startIcon={<RestartAltIcon />}
-          onClick={reset}
-          variant="outlined"
-          color="inherit"
-          size="small"
-        >
-          Сбросить всё
-        </Button>
+        <Stack spacing={1.5}>
+          <Button
+            fullWidth
+            startIcon={<RestartAltIcon />}
+            onClick={reset}
+            variant="outlined"
+            color="inherit"
+            size="small"
+          >
+            Сбросить всё
+          </Button>
+          <Button
+            fullWidth
+            onClick={handleExportCsv}
+            variant="contained"
+            color="primary"
+            size="small"
+          >
+            Экспорт CSV
+          </Button>
+          <Button
+            fullWidth
+            onClick={handleImportClick}
+            variant="outlined"
+            color="primary"
+            size="small"
+          >
+            Импорт CSV
+          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: "none" }}
+            onChange={handleImportFile}
+          />
+        </Stack>
       </Box>
       {!isMobile && <ResizeHandle side="left" onResize={handleLeftResize} />}
     </Box>

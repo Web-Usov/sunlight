@@ -328,7 +328,7 @@ export function calculatePower(
   const inputPower = lightSource.intensity * inputArea;
 
   const outputAngleRad = degToRad(rayTrace.outputAngle);
-  const incidenceCosFactor = Math.cos(outputAngleRad);
+  const incidenceCosFactor = Math.max(0, Math.cos(outputAngleRad));
 
   const concentrationFactor = rayTrace.concentrationRatio;
 

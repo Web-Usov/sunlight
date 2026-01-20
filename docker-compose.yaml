@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  sunlight-client:
+    image: ghcr.io/web-usov/sunlight:latest
+    container_name: sunlight-client
+    hostname: sunlight
+    restart: unless-stopped
+    ports:
+      - "8085:80"
+    networks:
+      - sunlight-net
+
+networks:
+  sunlight-net:
+    driver: bridge

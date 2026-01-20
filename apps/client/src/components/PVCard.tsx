@@ -142,7 +142,7 @@ export function PVCard({ pv, onUpdate }: PVCardProps) {
                 { value: 40, label: '40%' },
               ]}
               valueLabelDisplay="auto"
-              valueLabelFormat={(v) => `${v}%`}
+              valueLabelFormat={(v) => `${v.toFixed(1)}%`}
             />
           </Box>
         </Stack>
